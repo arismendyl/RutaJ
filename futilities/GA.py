@@ -1,10 +1,11 @@
 import numpy as np
 import math
+import streamlit as st
 
 class GA:
 
 
-    def __init__(self,df,dist_table,cendis_table,info_table,cars,weightlimit,oplimit,rng,n=100,genes=20,rparents=9.0/20.0,rchildren=9.0/40.0,rmutation=1.0/10.0):
+    def __init__(self,df,dist_table,cendis_table,info_table,cars,weightlimit,oplimit,rng,bar,n=100,genes=20,rparents=9.0/20.0,rchildren=9.0/40.0,rmutation=1.0/10.0):
         
         # Instance Variable
         self.df = df.copy()
@@ -14,6 +15,7 @@ class GA:
         self.options = info_table.index.values #array
         self.noptions = len(self.options)
         self.rng = rng
+        self.bar = bar
 
         self.cars = cars
         self.n = n
@@ -196,7 +198,7 @@ class GA:
         AvgxStd = Mean * Std
         opMissing = self.opMissing(carCuts,Tour) + 1
 
-        fitness = ((TotalDistance)**opMissing)*((AvgxStd)**Ncars)
+        fitness = ((TotalDistance)*opMissing)*((AvgxStd)*Ncars)
         
         return fitness
 
@@ -428,10 +430,12 @@ class GA:
 
     def evolution(self,epochs):
 
+        self.progress = 1.0/epochs
         self.initPopulation()
         self.updatePopFitness()
         self.means = np.array([self.fitnessMean()])
         for i in range(epochs):
+            self.bar.progress(self.progress*(i+1))
             self.crossoverPopulation()
             self.joinPopulation()
             self.mutatePopulation()
