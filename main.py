@@ -13,9 +13,11 @@ import time
 import math
 import base64
 import io
+from PIL import Image
 
 timestr = time.strftime("%Y%m%d")
 df = pd.read_csv('Lista_Datos_completos_data_09_02_Original.csv', sep=";")
+deliveryImage = Image.open('delivery.jpg')
 
 st_titleOfPage = st.markdown("<h1 style='text-align: center;'>RUTA J</h1>", unsafe_allow_html=True)
 
@@ -37,6 +39,7 @@ st_options = np.sort(df[muni].drop_duplicates().values)
 muni_s = st.sidebar.multiselect('Ciudades',st_options,help='Seleccione la ciudad a planear')
 current = st.sidebar.multiselect("Fecha de planeación (AA-MM-DD)", np.sort(df['FEC_DES'].drop_duplicates().values),help='Seleccione la fecha')
 ncars = st.sidebar.number_input('Número de camiones',min_value=1,step=1)
+ncars = int(ncars)
 
 op_limit = 20
 vol_limit = [14.0,20.0]
@@ -60,7 +63,6 @@ n_op = df_muni.shape[0]
 M3_total = df_muni[volumen].sum()
 min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
 
-st.markdown("<h3 style='text-align: center;'>Progreso</h3>", unsafe_allow_html=True)
 my_bar = st.progress(0)
 
 # In[5]:
@@ -73,6 +75,7 @@ opbucket_size = op_limit
 df_muni[bucket_by_op] = (df_muni[accop]/opbucket_size).apply(math.ceil)
 df_muni[identifier] = df_muni[neighborhood] + "_" + df_muni[bucket_by_vol].astype(str) + "_" + df_muni[bucket_by_op].astype(str)
 
+#st.image(deliveryImage)
 
 # In[6]:
 
@@ -135,7 +138,7 @@ if st_loadData or st.session_state.load_state:
     towrite.seek(0)
     b64 = base64.b64encode(towrite.read()).decode()
     new_filename = "Ruta_J_{}.xlsx".format(timestr)
-    linko= f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{new_filename}"><h3 style="text-align: center; text-decoration: underline">Descargar Archivo 📥</h3></a>'
+    linko= f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{new_filename}"><h3 style="text-align: center; text-decoration: underline; border-style: dashed">Descargar Archivo 📥</h3></a>'
     st.markdown(linko, unsafe_allow_html=True)
 
   csv_downloader(df_final_muni)
