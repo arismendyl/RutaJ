@@ -88,14 +88,15 @@ class GA:
 
         distance = 0
         ncars = len(carCuts)
+        car = 0
 
-        for car in range(ncars):
-
+        while (((car+1)<=ncars) and not (carCuts[car] is None)):
             inicio = carCuts[car]["inicio"]
             fin = carCuts[car]["fin"]
 
             path = Tour[inicio:fin+1]
             distance += self.distanceFromCendis(path)
+            car += 1
         return distance
 
 
@@ -104,8 +105,9 @@ class GA:
         ncars = len(carCuts)
 
         distance = np.empty([ncars])
+        car = 0
 
-        for car in range(ncars):
+        while (((car+1)<=ncars) and not (carCuts[car] is None)):
 
             inicio = carCuts[car]["inicio"]
             fin = carCuts[car]["fin"]
@@ -113,6 +115,8 @@ class GA:
             path = Tour[inicio:fin+1]
 
             distance[car] = self.distanceFromCendis(path)
+            car += 1
+
 
         mean = np.mean(distance)
         std = np.std(distance)
@@ -122,11 +126,19 @@ class GA:
 
     def opMissing(self,carCuts,Tour):
 
-        fin = carCuts[-1]["fin"]
-        path = Tour[fin+1:]
+        last = -1
 
-        op, _ = self.weighting(path)
+        LastCar = False
 
+        while not LastCar:
+
+            if carCuts[last] is not None:
+                fin = carCuts[last]["fin"]
+                path = Tour[fin+1:]
+                LastCar = True
+                op, _ = self.weighting(path)
+
+            last -= 1
         return op
 
 
@@ -422,7 +434,8 @@ class GA:
     def orderingTraceSample(self,CarCuts,Tour):
 
         for car in CarCuts:
-            Tour[car["inicio"]:car["fin"]+1] = self.orderFromCendis(Tour[car["inicio"]:car["fin"]+1])
+            if car is not None:
+                Tour[car["inicio"]:car["fin"]+1] = self.orderFromCendis(Tour[car["inicio"]:car["fin"]+1])
         
         return Tour
         

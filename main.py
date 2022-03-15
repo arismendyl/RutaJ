@@ -15,6 +15,7 @@ import math
 import base64
 import io
 from PIL import Image
+import plotly.graph_objects as go
 
 timestr = time.strftime("%Y%m%d")
 df = pd.read_csv('Lista_Datos_completos_data_09_02_Original.csv', sep=";")
@@ -35,6 +36,7 @@ bucket_by_vol = 'vol_bucket'
 bucket_by_op = 'op_bucket'
 df[date] = pd.to_datetime(df[date],format='%d/%m/%Y').dt.date
 st_mapcontainer = st.container()
+st_barcontainer = st.container()
 
 st_options = np.sort(df[muni].drop_duplicates().values)
 muni_s = st.sidebar.multiselect('Ciudades',st_options,help='Seleccione la ciudad a planear')
@@ -64,7 +66,6 @@ n_op = df_muni.shape[0]
 M3_total = df_muni[volumen].sum()
 min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
 
-my_bar = st.progress(0)
 
 # In[5]:
 
@@ -82,7 +83,10 @@ df_muni[identifier] = df_muni[neighborhood] + "_" + df_muni[bucket_by_vol].astyp
 
 if st_loadData: #or st.session_state.load_state:
 
-  st.session_state.load_state = True
+  my_bar = st.progress(0)
+
+
+  #st.session_state.load_state = True
 
   try:
     df_muni.loc[:,(lat)] = strtofloat(commatoperiod(df_muni.loc[:,(lat)]))
@@ -94,7 +98,6 @@ if st_loadData: #or st.session_state.load_state:
     fig.update_geos(fitbounds="locations")  
     fig.update_layout(height=400,margin={"r":0,"t":0,"l":0,"b":0})
     st_mapcontainer.plotly_chart(fig)
-
   except:
     print("Revise las latitudes y longitudes en su archivo, pueden haber algunas erróneas")
 
@@ -117,25 +120,43 @@ if st_loadData: #or st.session_state.load_state:
 # In[9]:
 
 
-  carOrg = np.empty([Model.noptions],dtype=int)
+  carOrg = np.empty([Model.noptions],dtype=object)
+  carOrg[:] = np.nan 
 
   RouteModel = Model.orderingTraceSample(Model.bestOfBest["Cars"],Model.bestOfBest["Tour"])
   CarsModel = Model.bestOfBest["Cars"]
 
   for car in range(len(CarsModel)):
-    carOrg[CarsModel[car]['inicio']:CarsModel[car]['fin']+1] = car + 1
+    if CarsModel[car] is not None:
+      carOrg[CarsModel[car]['inicio']:CarsModel[car]['fin']+1] = car + 1
 
   df_muni["CAMION"] = df_muni['ID'].apply(lambda x: carOrg[np.where(RouteModel == x)][0])
   df_muni["ORDEN"] = df_muni['ID'].apply(lambda x: np.where(RouteModel == x)[0][0])
   df_muni = df_muni.sort_values(by=['CAMION',"ORDEN"])
   df_final_muni = df_muni.drop(['vol_cumulative','vol_bucket',"op_cumulative","op_bucket","ID","ORDEN"], axis = 1) 
 
-  fig = px.line_mapbox(df_final_muni, lat=lat, lon=lon, color= "CAMION", hover_name=neighborhood, zoom=11 )
-  fig.update_layout(mapbox_style="open-street-map")
-  fig.update_geos(fitbounds="locations")  
-  fig.update_layout(height=400,margin={"r":0,"t":0,"l":0,"b":0})
-  st_mapcontainer.plotly_chart(fig)
 
+  fig2 = go.Figure()
+  grouped = df_final_muni.groupby("CAMION")
+  for name, group in grouped:
+    is_camion = df_final_muni.loc[:,("CAMION")].isin([name])
+    group = df_final_muni[(is_camion)].copy()
+    fig2.add_trace(
+      go.Scattermapbox(
+      mode = "markers+lines",
+      lat = group[lat].tolist(),
+      lon = group[lon].tolist(),
+      hovertext = group[neighborhood].tolist(),
+      marker = {"size": 10},
+      name = "CAMIÓN {}".format(int(name)))
+    )
+
+  fig2.update_layout(height=400,margin={"r":0,"t":0,"l":0,"b":0}, mapbox = {
+        'style': "open-street-map",
+        'zoom': 11,
+        'center': {'lon': df_final_muni[lon].mean(), 'lat': df_final_muni[lat].mean() }})
+  fig2.update_geos(fitbounds="geojson")  
+  st_mapcontainer.plotly_chart(fig2)
 
 # In[10]:
 
