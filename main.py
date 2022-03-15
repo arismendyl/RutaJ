@@ -1,4 +1,5 @@
 from turtle import onclick
+from matplotlib import markers
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -79,7 +80,7 @@ df_muni[identifier] = df_muni[neighborhood] + "_" + df_muni[bucket_by_vol].astyp
 
 # In[6]:
 
-if st_loadData or st.session_state.load_state:
+if st_loadData: #or st.session_state.load_state:
 
   st.session_state.load_state = True
 
@@ -106,7 +107,7 @@ if st_loadData or st.session_state.load_state:
 
 # In[8]:
 
-  epocas = 2
+  epocas = 150
   barProgress = 100/epocas
   Model = GA(df=df_muni,dist_table=dist_matrix,cendis_table=dist_CENDIS,info_table=info_table,cars=ncars,weightlimit=vol_limit,oplimit=op_limit,rng=rng,bar=my_bar)
   Model.evolution(epocas)
@@ -129,6 +130,12 @@ if st_loadData or st.session_state.load_state:
   df_muni = df_muni.sort_values(by=['CAMION',"ORDEN"])
   df_final_muni = df_muni.drop(['vol_cumulative','vol_bucket',"op_cumulative","op_bucket","ID","ORDEN"], axis = 1) 
 
+  fig = px.line_mapbox(df_final_muni, lat=lat, lon=lon, color= "CAMION", hover_name=neighborhood, zoom=11 )
+  fig.update_layout(mapbox_style="open-street-map")
+  fig.update_geos(fitbounds="locations")  
+  fig.update_layout(height=400,margin={"r":0,"t":0,"l":0,"b":0})
+  st_mapcontainer.plotly_chart(fig)
+
 
 # In[10]:
 
@@ -142,12 +149,6 @@ if st_loadData or st.session_state.load_state:
     st.markdown(linko, unsafe_allow_html=True)
 
   csv_downloader(df_final_muni)
-
-  # button = st.download_button(label='📥 Download Current Result',
-  #                             data=csv,
-  #                             file_name= 'large_df.csv',
-  #                             mime='text/csv',on_click=ok)
-
 
   # import geopy
 
