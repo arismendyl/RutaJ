@@ -8,6 +8,7 @@ from futilities.distances import cal_depot
 from futilities.transfloat import commatoperiod
 from futilities.transfloat import strtofloat
 from futilities.GA import GA
+import futilities.dijkstra as dj
 import matplotlib.pyplot as plt
 import plotly.express as px
 import time
@@ -18,7 +19,7 @@ from PIL import Image
 import plotly.graph_objects as go
 
 timestr = time.strftime("%Y%m%d")
-df = pd.read_csv('Lista_Datos_completos_data_09_02_Original.csv', sep=";")
+df = pd.read_csv('Lista_Datos_completos_data_16_03.csv', sep=";")
 deliveryImage = Image.open('delivery.jpg')
 
 st_titleOfPage = st.markdown("<h1 style='text-align: center;'>RUTA J</h1>", unsafe_allow_html=True)
@@ -46,14 +47,15 @@ ncars = int(ncars)
 
 op_limit = 20
 vol_limit = [14.0,20.0]
-st_CENDIS_LOG = st.sidebar.number_input("Ingrese longitud de origen",value=-74.8518516,step=1e-8,format="%.7f")
-st_CENDIS_LAT = st.sidebar.number_input("Ingrese latitud de origen",value=10.9358485,step=1e-8,format="%.7f") 
+#st_CENDIS_LOG = st.sidebar.number_input("Ingrese longitud de origen",value=-74.8518516,step=1e-8,format="%.7f")
+#st_CENDIS_LAT = st.sidebar.number_input("Ingrese latitud de origen",value=10.9358485,step=1e-8,format="%.7f") 
 st_loadData = st.sidebar.button("Cargar datos")
 
 if "load_state" not in st.session_state:
   st.session_state.load_state = False
 
-CENDIS = [st_CENDIS_LOG,st_CENDIS_LAT]
+#CENDIS = [st_CENDIS_LOG,st_CENDIS_LAT]
+CENDIS = [-74.8518516,10.9358485]
 rng = np.random.default_rng(2022)
 
 is_muni = df.loc[:,muni].isin(muni_s)
@@ -83,7 +85,8 @@ df_muni[identifier] = df_muni[neighborhood] + "_" + df_muni[bucket_by_vol].astyp
 
 if st_loadData: #or st.session_state.load_state:
 
-  my_bar = st.progress(0)
+  my_bar = st.empty()
+  my_bar.progress(0)
 
 
   #st.session_state.load_state = True
@@ -93,13 +96,14 @@ if st_loadData: #or st.session_state.load_state:
     df_muni.loc[:,(lon)] = strtofloat(commatoperiod(df_muni.loc[:,(lon)]))
     dist_matrix = cal_dist(df_muni,lat,lon,identifier)
     dist_CENDIS = cal_depot(df_muni, lat, lon, identifier, CENDIS)
-    fig = px.scatter_mapbox(df_muni, lat=lat, lon=lon, color_discrete_sequence=["fuchsia"], hover_name=neighborhood, zoom=11)
+    st_titleOfOPMap = st_mapcontainer.markdown("<h3 style='text-align: center;font-family:poppins;'>Mapa de órdenes de pedido</h3>", unsafe_allow_html=True)
+    fig = px.scatter_mapbox(df_muni, lat=lat, lon=lon, color_discrete_sequence=["fuchsia"], hover_name=neighborhood, zoom=11, title="Mapa de Órdenes de Pedido")
     fig.update_layout(mapbox_style="open-street-map")
     fig.update_geos(fitbounds="locations")  
     fig.update_layout(height=400,margin={"r":0,"t":0,"l":0,"b":0})
     st_mapcontainer.plotly_chart(fig)
   except:
-    print("Revise las latitudes y longitudes en su archivo, pueden haber algunas erróneas")
+    st.warning("Revise las latitudes y longitudes en su archivo, pueden haber algunas erróneas")
 
 # In[7]:
 
@@ -110,7 +114,7 @@ if st_loadData: #or st.session_state.load_state:
 
 # In[8]:
 
-  epocas = 150
+  epocas = 50
   barProgress = 100/epocas
   Model = GA(df=df_muni,dist_table=dist_matrix,cendis_table=dist_CENDIS,info_table=info_table,cars=ncars,weightlimit=vol_limit,oplimit=op_limit,rng=rng,bar=my_bar)
   Model.evolution(epocas)
@@ -135,7 +139,7 @@ if st_loadData: #or st.session_state.load_state:
   df_muni = df_muni.sort_values(by=['CAMION',"ORDEN"])
   df_final_muni = df_muni.drop(['vol_cumulative','vol_bucket',"op_cumulative","op_bucket","ID","ORDEN"], axis = 1) 
 
-
+  st_titleOfRouteMap = st_mapcontainer.markdown("<h3 style='text-align: center;font-family:poppins;'>Mapa de ruta</h3>", unsafe_allow_html=True)
   fig2 = go.Figure()
   grouped = df_final_muni.groupby("CAMION")
   for name, group in grouped:
@@ -169,6 +173,8 @@ if st_loadData: #or st.session_state.load_state:
     linko= f'<a href="data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,{b64}" download="{new_filename}"><h3 style="text-align: center; text-decoration: underline; border-style: dashed">Descargar Archivo 📥</h3></a>'
     st.markdown(linko, unsafe_allow_html=True)
 
+  my_bar.empty()
+
   csv_downloader(df_final_muni)
 
   # import geopy
@@ -190,4 +196,5 @@ if st_loadData: #or st.session_state.load_state:
 
   # map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
-  # st.map(map_data) 
+  # st.map(map_data)
+
