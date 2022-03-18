@@ -1,5 +1,3 @@
-from turtle import onclick
-from matplotlib import markers
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -176,25 +174,3 @@ if st_loadData: #or st.session_state.load_state:
   my_bar.empty()
 
   csv_downloader(df_final_muni)
-
-  # import geopy
-
-  # from geopy.geocoders import Nominatim
-  # from geopy.extra.rate_limiter import RateLimiter
-
-  # street = st.sidebar.text_input("Street", "75 Bay Street")
-  # city = st.sidebar.text_input("City", "Toronto")
-  # province = st.sidebar.text_input("Province", "Ontario")
-  # country = st.sidebar.text_input("Country", "Canada")
-
-  # geolocator = Nominatim(user_agent="Ruta J")
-  # geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
-  # location = geolocator.geocode(street+", "+city+", "+province+", "+country)
-
-  # lat = location.latitude
-  # lon = location.longitude
-
-  # map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
-
-  # st.map(map_data)
-
