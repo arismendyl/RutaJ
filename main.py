@@ -40,6 +40,7 @@ lon = 'LONGITUD'
 date = 'FEC_DES'
 volumen = 'M3'
 neighborhood = 'NOMBRE_EQUIVALENTE'
+dangerousness = "ZONA_LOG"
 identifier = "ID"
 accvolumen = 'vol_cumulative'
 accop = 'op_cumulative'
@@ -59,7 +60,6 @@ op_limit = 20
 vol_limit = [14.0,20.0]
 #st_CENDIS_LOG = st.sidebar.number_input("Ingrese longitud de origen",value=-74.8518516,step=1e-8,format="%.7f")
 #st_CENDIS_LAT = st.sidebar.number_input("Ingrese latitud de origen",value=10.9358485,step=1e-8,format="%.7f") 
-st_loadData = st.sidebar.button("Cargar datos")
 
 if "load_state" not in st.session_state:
   st.session_state.load_state = False
@@ -68,9 +68,10 @@ if "load_state" not in st.session_state:
 CENDIS = [-74.8518516,10.9358485]
 rng = np.random.default_rng(2022)
 
+is_not_dangerous = ~df.loc[:,muni].isin(['C0'])
 is_muni = df.loc[:,muni].isin(muni_s)
 is_date = df.loc[:,date].isin(current)
-df_muni = df[(is_muni) & (is_date)].copy()
+df_muni = df[(is_muni) & (is_date) & (is_not_dangerous)].copy()
 st.dataframe(df_muni)
 df_muni[volumen] = df_muni[volumen]/1000
 df_muni = df_muni.sort_values(by=[neighborhood,volumen])
@@ -78,7 +79,9 @@ df_muni[accvolumen] = df_muni.groupby([neighborhood])[volumen].cumsum()
 n_op = df_muni.shape[0]
 M3_total = df_muni[volumen].sum()
 min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
-
+if ncars < min_car:
+  st.sidebar.warning("Podrías necesitar mínimo {} carros".format(min_car))
+st_loadData = st.sidebar.button("Cargar datos")
 
 # In[5]:
 
@@ -121,7 +124,6 @@ if st_loadData: #or st.session_state.load_state:
   info_s = 'sum'
   info_c = 'count'
   info_table = df_muni.groupby(identifier)[volumen].agg([info_s,info_c])
-
 
 # In[8]:
 

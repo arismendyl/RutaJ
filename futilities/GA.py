@@ -39,6 +39,8 @@ class GA:
         self.mile = np.empty([self.n])
 
         self.Tour = np.empty([self.n,len(self.options)],dtype=object)
+        print("size Tour")
+        print(self.Tour.shape)
         self.TourParents = np.empty([self.nparents,len(self.options)],dtype=object)
         self.TourChildren = np.empty([self.nchildren,len(self.options)],dtype=object)
         self.CarCuts = np.empty([self.n,self.cars],dtype=object)
@@ -407,9 +409,12 @@ class GA:
 
         self.stage = 4
 
-        candidates = self.rng.choice(self.n,self.nmutation,replace=False)
-
+        candidates = self.rng.choice(self.Tour.shape[0],self.nmutation,replace=False)
+        print(candidates)
+        print("size Tour mutation")
+        print(self.Tour.shape)
         for candidate in candidates:
+            print(self.Tour[candidate])
             self.Tour[candidate] = self.mutate(self.Tour[candidate],self.noptions,0.2)
 
 
@@ -417,9 +422,9 @@ class GA:
 
         self.stage = 5
 
-        self.CarCuts = np.empty([self.n,self.cars],dtype=object)
+        self.CarCuts = np.empty([self.Tour.shape[0],self.cars],dtype=object)
 
-        for sample in range(self.n):
+        for sample in range(self.Tour.shape[0]):
 
             self.cutter(sample,self.Tour[sample])
 
