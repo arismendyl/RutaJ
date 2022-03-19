@@ -15,9 +15,21 @@ import base64
 import io
 from PIL import Image
 import plotly.graph_objects as go
+import requests
+from secret import secretUrl
+import json
+
+@st.cache(allow_output_mutation=True)
+def loadData(secretUrl):
+  response = requests.get(url = secretUrl)
+  data = response.json()["op"]
+  jsonResponse = json.dumps(data)
+  df = pd.read_json(jsonResponse)
+  return df
 
 timestr = time.strftime("%Y%m%d")
-df = pd.read_csv('Lista_Datos_completos_data_16_03.csv', sep=";")
+df = loadData(secretUrl)
+
 deliveryImage = Image.open('delivery.jpg')
 
 st_titleOfPage = st.markdown("<h1 style='text-align: center;'>RUTA J</h1>", unsafe_allow_html=True)
@@ -33,7 +45,7 @@ accvolumen = 'vol_cumulative'
 accop = 'op_cumulative'
 bucket_by_vol = 'vol_bucket'
 bucket_by_op = 'op_bucket'
-df[date] = pd.to_datetime(df[date],format='%d/%m/%Y').dt.date
+df[date] = pd.to_datetime(df[date]).dt.date
 st_mapcontainer = st.container()
 st_barcontainer = st.container()
 
@@ -59,6 +71,7 @@ rng = np.random.default_rng(2022)
 is_muni = df.loc[:,muni].isin(muni_s)
 is_date = df.loc[:,date].isin(current)
 df_muni = df[(is_muni) & (is_date)].copy()
+st.dataframe(df_muni)
 df_muni[volumen] = df_muni[volumen]/1000
 df_muni = df_muni.sort_values(by=[neighborhood,volumen])
 df_muni[accvolumen] = df_muni.groupby([neighborhood])[volumen].cumsum()

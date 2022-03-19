@@ -1,0 +1,1 @@
+secretUrl = "https://6uzta2fm6i.execute-api.us-east-1.amazonaws.com/prd/ops"
