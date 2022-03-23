@@ -1,5 +1,3 @@
-from faulthandler import disable
-from typing import final
 import streamlit as st
 import pandas as pd
 import numpy as np
