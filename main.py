@@ -43,7 +43,13 @@ if dataUploaded:
 
   st_titleOfPage = st.markdown("<h1 style='text-align: center;'>RUTA J</h1>", unsafe_allow_html=True)
 
-  muni = 'MUN_DES'
+  locationFilter = st.sidebar.radio("Filtrar las OP por ciudad o departamento:",('Ciudad', 'Departamento'), index=0)
+
+  if locationFilter == 'Ciudad':
+    muni = 'MUN_DES'
+  else:
+    muni = 'DEP_DES'
+
   lat = 'LATITUD'
   lon = 'LONGITUD'
   date = 'FEC_DES'
@@ -63,7 +69,11 @@ if dataUploaded:
   st_barcontainer = st.container()
 
   st_options = np.sort(df[muni].drop_duplicates().values)
-  muni_s = st.sidebar.multiselect('Ciudades',st_options,help='Seleccione la ciudad a planear')
+  if locationFilter == 'Ciudad':
+    muni_s = st.sidebar.multiselect('Ciudades',st_options,help='Seleccione la ciudad a planear')
+  else:
+    muni_s = st.sidebar.multiselect('Departamentos',st_options,help='Seleccione el departamento a planear')
+
   current = st.sidebar.multiselect("Fecha de planeación (AA-MM-DD)", np.sort(df['FEC_DES'].drop_duplicates().values),help='Seleccione la fecha')
 
   op_limit = 20
