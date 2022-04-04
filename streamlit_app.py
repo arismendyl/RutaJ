@@ -88,11 +88,12 @@ if dataUploaded:
   CENDIS = [-74.8518516,10.9358485]
   rng = np.random.default_rng(2022)
 
-  is_not_dangerous = ~df.loc[:,zona].isin(['C0'])
   is_muni = df.loc[:,muni].isin(muni_s)
   is_date = df.loc[:,date].isin(current)
-  df_muni = df[(is_muni) & (is_date) & (is_not_dangerous)].copy()
-  df_muni_C0 = df[(~is_not_dangerous)].copy()
+  df_muni = df[(is_muni) & (is_date)].copy()
+  is_not_dangerous = ~df_muni.loc[:,zona].isin(['C0'])
+  df_muni_C0 = df_muni[(~is_not_dangerous)].copy()
+  df_muni = df_muni[(is_not_dangerous)].copy()
   st.dataframe(df_muni)
   df_muni[volumen] = df_muni[volumen]/1000
   df_muni = df_muni.sort_values(by=[neighborhood,volumen])
