@@ -62,7 +62,6 @@ class GA:
             "epoch": epoch + 1
         }
 
-
     def distanceFromCendis(self,path):
 
         distance = 0
