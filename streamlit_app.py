@@ -27,6 +27,10 @@ def cargandoDatos(secretUrl):
   df.drop_duplicates(keep='first',inplace=True)
   return df
 
+st.set_page_config(
+    page_title="RUTA J",
+    page_icon=":truck:")
+
 if __name__ == "__main__":
 
   timestr = time.strftime("%Y%m%d")
@@ -44,9 +48,7 @@ if __name__ == "__main__":
     dataUploaded = False
 
   if dataUploaded:
-
-    deliveryImage = Image.open('delivery.jpg')
-
+    
     st_titleOfPage = st.markdown("<h1 style='text-align: center;'>RUTA J</h1>", unsafe_allow_html=True)
 
     locationFilter = st.sidebar.radio("Filtrar las OP por ciudad o departamento:",('Ciudad', 'Departamento'), index=0)
