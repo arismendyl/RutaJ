@@ -18,7 +18,7 @@ import requests
 from secret import secretUrl
 import json
 
-@st.experimental_memo(ttl=3600)
+@st.experimental_memo(ttl=1800.0)
 def cargandoDatos(secretUrl):
   response = requests.get(url = secretUrl)
   data = response.json()["op"]
