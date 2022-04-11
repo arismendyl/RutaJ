@@ -109,7 +109,7 @@ if __name__ == "__main__":
     n_op = df_muni.shape[0]
 
     M3_total = df_muni[volumen].sum()
-    min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit])) + 1
+    min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
 
 
     try:
@@ -122,8 +122,6 @@ if __name__ == "__main__":
       pass
 
     st_loadData = st.sidebar.button("Ejecutar Ruta J",help='Oprima para realizar la planeación')
-
-    # In[5]:
 
 
     volbucket_size = vol_limit[1]

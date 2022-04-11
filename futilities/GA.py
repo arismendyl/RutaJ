@@ -209,7 +209,7 @@ class GA:
         AvgxStd = Mean * Std
         opMissing = self.opMissing(carCuts,Tour) + 1
 
-        fitness = ((TotalDistance)*opMissing)*((AvgxStd)*Ncars)
+        fitness = ((TotalDistance)*opMissing**2)*((AvgxStd)*Ncars)
         
         return fitness
 
