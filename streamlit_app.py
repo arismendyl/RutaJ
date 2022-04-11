@@ -18,7 +18,7 @@ import requests
 from secret import secretUrl
 import json
 
-@st.experimental_memo()
+@st.experimental_memo(ttl=3600)
 def cargandoDatos(secretUrl):
   response = requests.get(url = secretUrl)
   data = response.json()["op"]
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     n_op = df_muni.shape[0]
 
     M3_total = df_muni[volumen].sum()
-    min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
+    min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit])) + 1
 
 
     try:
