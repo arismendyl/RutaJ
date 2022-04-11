@@ -58,6 +58,9 @@ if __name__ == "__main__":
     else:
       muni = 'DEP_DES'
 
+    celular = "NUM_PEDIDO_SAP"
+    pedidoSAP = "CELULAR"
+
     lat = 'LATITUD'
     lon = 'LONGITUD'
     date = 'FEC_DES'
@@ -73,6 +76,8 @@ if __name__ == "__main__":
     bucket_by_op = 'op_bucket'
     df[date] = pd.to_datetime(df[date]).dt.date
     df[entrega] = df[entrega].fillna(0).astype('int64')
+    df[celular] = df[celular].fillna(0).astype('int64')
+    df[pedidoSAP] = df[pedidoSAP].fillna(0).astype('int64')
     st_mapcontainer = st.container()
     st_barcontainer = st.container()
 
@@ -102,8 +107,10 @@ if __name__ == "__main__":
     is_not_dangerous = ~df_muni.loc[:,zona].isin(['C0'])
     df_muni_C0 = df_muni[(~is_not_dangerous)].copy()
     df_muni = df_muni[(is_not_dangerous)].copy()
-    st.dataframe(df_muni)
     df_muni[volumen] = df_muni[volumen]/1000
+    cubicaje = df_muni[volumen].sum()
+    st_titleOfRouteMap = st_mapcontainer.markdown("<h3 style='text-align: center;font-family:poppins;color:red;'>Cubicaje Total: "+str(round(cubicaje,2)).replace(".", ",")+" m3</h3>", unsafe_allow_html=True)
+    st.dataframe(df_muni)
     df_muni = df_muni.sort_values(by=[neighborhood,volumen])
     df_muni[accvolumen] = df_muni.groupby([neighborhood])[volumen].cumsum()
     n_op = df_muni.shape[0]
