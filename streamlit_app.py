@@ -107,17 +107,29 @@ if __name__ == "__main__":
     is_not_dangerous = ~df_muni.loc[:,zona].isin(['C0'])
     df_muni_C0 = df_muni[(~is_not_dangerous)].copy()
     df_muni = df_muni[(is_not_dangerous)].copy()
+
+    isNotNull = ~df.loc[:,entrega].isin([0])
+    entregasAlready = df_muni.loc[:,entrega].values
+    isNotAlready = ~df.loc[:,entrega].isin(entregasAlready) 
+    entrega_options = np.sort(df[(isNotNull)&(isNotAlready)].loc[:,entrega].drop_duplicates().values)
+    entregasAdicionales = st.sidebar.multiselect('Entregas adicionales',entrega_options,help='Digite el número de entrega de los adelantos')
+    isAnAdicional = df.loc[:,entrega].isin(entregasAdicionales)
+    opAdicionales = df[(isAnAdicional)].copy()
+
+    if len(entregasAdicionales)>0:
+      frames = [opAdicionales.copy(),df_muni.copy()]
+      df_muni = pd.concat(frames)
+
     df_muni[volumen] = df_muni[volumen]/1000
     M3_total = df_muni[volumen].sum()
     n_op = df_muni.shape[0]
     cubicajeTitle = st_mapcontainer.markdown("<h4 style='text-align: center;font-family:poppins;color:red;'>Cubicaje Total: "+str(round(M3_total,2)).replace(".", ",")+" m3</h4>", unsafe_allow_html=True)
     entregaTitle = st_mapcontainer.markdown("<h4 style='text-align: center;font-family:poppins;color:red;'>Entregas Totales: "+str(n_op).replace(".", ",")+"</h4>", unsafe_allow_html=True)
-    st.dataframe(df_muni)
+    st.dataframe(df_muni.reset_index(drop=True))
     df_muni = df_muni.sort_values(by=[neighborhood,volumen])
     df_muni[accvolumen] = df_muni.groupby([neighborhood])[volumen].cumsum()
 
     min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
-
 
     try:
       ncars = st.sidebar.number_input('Número de camiones',min_value=1,value=min_car,step=1,help="Digite el número de camiones disponibles")
@@ -127,6 +139,7 @@ if __name__ == "__main__":
         st.sidebar.warning("Podrías necesitar mínimo {} carros".format(min_car))
     except:
       pass
+
 
     st_loadData = st.sidebar.button("Ejecutar Ruta J",help='Oprima para realizar la planeación')
 
