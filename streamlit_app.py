@@ -58,8 +58,8 @@ if __name__ == "__main__":
     else:
       muni = 'DEP_DES'
 
-    celular = "NUM_PEDIDO_SAP"
-    pedidoSAP = "CELULAR"
+    pedidoSAP = "NUM_PEDIDO_SAP"
+    celular = "CELULAR"
 
     lat = 'LATITUD'
     lon = 'LONGITUD'
@@ -76,7 +76,7 @@ if __name__ == "__main__":
     bucket_by_op = 'op_bucket'
     df[date] = pd.to_datetime(df[date]).dt.date
     df[entrega] = df[entrega].fillna(0).astype('int64')
-    df[celular] = df[celular].fillna(0).astype('int64')
+    df[celular] = df[celular].fillna(0).astype('str')
     df[pedidoSAP] = df[pedidoSAP].fillna(0).astype('int64')
     st_mapcontainer = st.container()
     st_barcontainer = st.container()
