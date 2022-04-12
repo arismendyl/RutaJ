@@ -108,19 +108,19 @@ if __name__ == "__main__":
     df_muni_C0 = df_muni[(~is_not_dangerous)].copy()
     df_muni = df_muni[(is_not_dangerous)].copy()
     df_muni[volumen] = df_muni[volumen]/1000
-    cubicaje = df_muni[volumen].sum()
-    st_titleOfRouteMap = st_mapcontainer.markdown("<h3 style='text-align: center;font-family:poppins;color:red;'>Cubicaje Total: "+str(round(cubicaje,2)).replace(".", ",")+" m3</h3>", unsafe_allow_html=True)
+    M3_total = df_muni[volumen].sum()
+    n_op = df_muni.shape[0]
+    cubicajeTitle = st_mapcontainer.markdown("<h4 style='text-align: center;font-family:poppins;color:red;'>Cubicaje Total: "+str(round(M3_total,2)).replace(".", ",")+" m3</h4>", unsafe_allow_html=True)
+    entregaTitle = st_mapcontainer.markdown("<h4 style='text-align: center;font-family:poppins;color:red;'>Entregas Totales: "+str(n_op).replace(".", ",")+"</h4>", unsafe_allow_html=True)
     st.dataframe(df_muni)
     df_muni = df_muni.sort_values(by=[neighborhood,volumen])
     df_muni[accvolumen] = df_muni.groupby([neighborhood])[volumen].cumsum()
-    n_op = df_muni.shape[0]
 
-    M3_total = df_muni[volumen].sum()
     min_car = math.ceil(max([n_op/vol_limit[0],M3_total/op_limit]))
 
 
     try:
-      ncars = st.sidebar.number_input('Número de camiones',min_value=2,value=min_car,step=1,help="Debe seleccionar mínimo 2")
+      ncars = st.sidebar.number_input('Número de camiones',min_value=1,value=min_car,step=1,help="Digite el número de camiones disponibles")
       ncars = int(ncars)
 
       if ncars < min_car:
