@@ -185,7 +185,7 @@ if __name__ == "__main__":
 
     # In[8]:
 
-      epocas = 100
+      epocas = 500
       barProgress = 100/epocas
       Model = GA(df=df_muni,dist_table=dist_matrix,cendis_table=dist_CENDIS,info_table=info_table,cars=ncars,weightlimit=vol_limit,oplimit=op_limit,rng=rng,bar=my_bar)
       Model.evolution(epocas)
